@@ -1,0 +1,150 @@
+// Імпортуємо хук useState з React
+import { useState } from 'react';
+
+// Компонент Square представляє одну клітинку на полі
+function Square({ value, onSquareClick }) {
+  return (
+    // При натисканні викликається функція onSquareClick
+    <button className="square" onClick={onSquareClick}>
+      {value}
+    </button>
+  );
+}
+
+// Компонент Board відображає всю дошку гри
+function Board({ xIsNext, squares, onPlay }) {
+  // Обробка кліку по клітинці
+  function handleClick(i) {
+    // Якщо вже є переможець або клітинка зайнята — нічого не робимо
+    if (calculateWinner(squares) || squares[i]) {
+      return;
+    }
+
+    // Копіюємо масив squares, щоб не змінювати оригінал напряму
+    const nextSquares = squares.slice();
+
+    // Встановлюємо символ поточного гравця у вибрану клітинку
+    if (xIsNext) {
+      nextSquares[i] = 'X';
+    } else {
+      nextSquares[i] = 'O';
+    }
+
+    // Викликаємо onPlay, щоб оновити стан гри у батьківському компоненті
+    onPlay(nextSquares);
+  }
+
+  // Визначаємо переможця, якщо він є
+  const winner = calculateWinner(squares);
+
+  // Формуємо повідомлення про стан гри
+  let status;
+  if (winner) {
+    status = 'Переможець: ' + winner;
+  } else {
+    status = 'Наступний хід: ' + (xIsNext ? 'X' : 'O');
+  }
+
+  // Повертаємо розмітку дошки з 9 клітинками (3x3)
+  return (
+    <>
+      <div className="status">{status}</div>
+      <div className="board-row">
+        <Square value={squares[0]} onSquareClick={() => handleClick(0)} />
+        <Square value={squares[1]} onSquareClick={() => handleClick(1)} />
+        <Square value={squares[2]} onSquareClick={() => handleClick(2)} />
+      </div>
+      <div className="board-row">
+        <Square value={squares[3]} onSquareClick={() => handleClick(3)} />
+        <Square value={squares[4]} onSquareClick={() => handleClick(4)} />
+        <Square value={squares[5]} onSquareClick={() => handleClick(5)} />
+      </div>
+      <div className="board-row">
+        <Square value={squares[6]} onSquareClick={() => handleClick(6)} />
+        <Square value={squares[7]} onSquareClick={() => handleClick(7)} />
+        <Square value={squares[8]} onSquareClick={() => handleClick(8)} />
+      </div>
+    </>
+  );
+}
+
+// Головний компонент гри
+export default function Game() {
+  // Історія ходів (масив станів поля)
+  const [history, setHistory] = useState([Array(9).fill(null)]);
+
+  // Номер поточного ходу
+  const [currentMove, setCurrentMove] = useState(0);
+
+  // Визначаємо, хто ходить наступним
+  const xIsNext = currentMove % 2 === 0;
+
+  // Поточний стан дошки
+  const currentSquares = history[currentMove];
+
+  // Обробка нового ходу
+  function handlePlay(nextSquares) {
+    // Обрізаємо історію до поточного ходу і додаємо новий стан
+    const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
+    setHistory(nextHistory);
+    setCurrentMove(nextHistory.length - 1);
+  }
+
+  // Перемикання до певного ходу в історії
+  function jumpTo(nextMove) {
+    setCurrentMove(nextMove);
+  }
+
+  // Створюємо список кнопок для перемикання між ходами
+  const moves = history.map((squares, move) => {
+    let description;
+    if (move > 0) {
+      description = 'Перейти до ходу #' + move;
+    } else {
+      description = 'Початок гри';
+    }
+    return (
+      <li key={move}>
+        <button onClick={() => jumpTo(move)}>{description}</button>
+      </li>
+    );
+  });
+
+  // Повертаємо інтерфейс гри: дошку та історію ходів
+  return (
+    <div className="game">
+      <div className="game-board">
+        <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay} />
+      </div>
+      <div className="game-info">
+        <ol>{moves}</ol>
+      </div>
+    </div>
+  );
+}
+
+// Функція для визначення переможця
+function calculateWinner(squares) {
+  // Усі можливі комбінації виграшу
+  const lines = [
+    [0, 1, 2], // перший ряд
+    [3, 4, 5], // другий ряд
+    [6, 7, 8], // третій ряд
+    [0, 3, 6], // перший стовпець
+    [1, 4, 7], // другий стовпець
+    [2, 5, 8], // третій стовпець
+    [0, 4, 8], // діагональ \
+    [2, 4, 6], // діагональ /
+  ];
+
+  // Перевіряємо, чи однакові символи в комірках комбінації
+  for (let i = 0; i < lines.length; i++) {
+    const [a, b, c] = lines[i];
+    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+      return squares[a]; // Повертаємо символ переможця
+    }
+  }
+
+  // Якщо переможця немає — повертаємо null
+  return null;
+}
