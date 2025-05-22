@@ -1,0 +1,155 @@
+function HelloWorld() {
+  return <h1>Привіт, світ!</h1>;
+}
+-----------------------
+
+import { useState } from 'react';
+
+function Counter() {
+  // Ініціалізуємо стан лічильника зі значенням 0
+  const [count, setCount] = useState(0);
+
+  return (
+    <div>
+      <p>Лічильник: {count}</p>
+      {/* Збільшуємо значення лічильника на 1 при натисканні */}
+      <button onClick={() => setCount(count + 1)}>Збільшити</button>
+    </div>
+  );
+}
+---------------------------------------------------------------------
+
+import { useEffect } from 'react';
+
+function Logger() {
+  // Цей ефект виконається один раз після першого рендеру
+  useEffect(() => {
+    console.log('Компонент відображено!');
+  }, []);
+
+  return <p>Перевір консоль</p>;
+}
+---------------------------------------------------------------------
+import { useRef } from 'react';
+
+function FocusInput() {
+  // Створюємо ref для доступу до DOM-елемента input
+  const inputRef = useRef();
+
+  const handleFocus = () => {
+    // Встановлюємо фокус на input при натисканні кнопки
+    inputRef.current.focus();
+  };
+
+  return (
+    <div>
+      <input ref={inputRef} type="text" />
+      <button onClick={handleFocus}>Фокус</button>
+    </div>
+  );
+}
+-----------------------------------------------------------------------
+import React, { createContext, useContext, useState } from 'react';
+
+// Створюємо контекст теми
+const ThemeContext = createContext();
+
+// Компонент-провайдер, що надає тему іншим компонентам
+function ThemeProvider({ children }) {
+  const [dark, setDark] = useState(false);
+
+  // Функція для перемикання теми
+  const toggleTheme = () => setDark(!dark);
+
+  return (
+    <ThemeContext.Provider value={{ dark, toggleTheme }}>
+      {children}
+    </ThemeContext.Provider>
+  );
+}
+
+// Компонент, який використовує тему з контексту
+function ThemeButton() {
+  const { dark, toggleTheme } = useContext(ThemeContext);
+
+  return (
+    <button onClick={toggleTheme}>
+      Змінити тему (поточна: {dark ? 'Темна' : 'Світла'})
+    </button>
+  );
+}
+
+// Головний компонент додатку
+function App() {
+  return (
+    <ThemeProvider>
+      <ThemeButton />
+    </ThemeProvider>
+  );
+}
+-------------------------------------------------------------
+// Дочірній компонент отримує name як пропс
+function Greeting({ name }) {
+  return <h2>Привіт, {name}!</h2>;
+}
+
+// Батьківський компонент передає значення до дочірнього
+function Parent() {
+  return <Greeting name="Олександр" />;
+}
+--------------------------------------------------------------
+function List() {
+  const items = ['яблуко', 'банан', 'вишня'];
+
+  return (
+    <ul>
+      {/* Використовуємо .map() для створення елементів списку */}
+      {items.map((item, index) => (
+        // Ключ має бути унікальним для кожного елемента
+        <li key={index}>{item}</li>
+      ))}
+    </ul>
+  );
+}
+------------------------------------------------------------------
+function Form() {
+  // Обробник події надсилання форми
+  const handleSubmit = (e) => {
+    e.preventDefault(); // Зупиняємо перезавантаження сторінки
+    alert('Форма надіслана!');
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input type="text" placeholder="Ваше ім'я" />
+      <button type="submit">Надіслати</button>
+    </form>
+  );
+}
+-------------------------------------------------------------------------
+function Message({ isLoggedIn }) {
+  return (
+    <div>
+      {/* Відображаємо різні повідомлення залежно від умови */}
+      {isLoggedIn ? <p>Вітаємо назад!</p> : <p>Будь ласка, увійдіть.</p>}
+    </div>
+  );
+}
+------------------------------------------------------------------
+
+
+// Простий багаторазовий компонент кнопки
+function Button({ text }) {
+  return <button>{text}</button>;
+}
+
+// Компонент, що використовує кнопки разом
+function Toolbar() {
+  return (
+    <div>
+      <Button text="Зберегти" />
+      <Button text="Скасувати" />
+    </div>
+  );
+}
+
